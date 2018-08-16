@@ -32,3 +32,11 @@ copy `update-hosts` to `/usr/local/bin`.
 ```
 $ sudo update-hosts
 ```
+
+# Template
+
+There variables are defined.
+
+```
+ip_address
+```
