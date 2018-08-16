@@ -1,0 +1,42 @@
+#!/usr/bin/env ruby
+require 'erb'
+require 'pathname'
+require 'socket'
+require 'ostruct'
+
+template_path = Pathname("/etc/hosts.erb")
+unless template_path.exist?
+	raise Exception.new("template not exists: #{template_path}")
+end
+
+ifa = Socket.getifaddrs.find{|ifa|
+	if ifa.addr.ip?
+		if ifa.addr.ip_address.start_with?("192.")
+			break ifa
+		end
+	end
+}
+unless ifa
+	raise Exception.new("self ip not found")
+end
+
+namespace = OpenStruct.new(
+	ip_address: ifa.addr.ip_address)
+
+puts "ip_address=#{namespace.ip_address}"
+puts
+
+template = ERB.new(template_path.read())
+result = template.result(namespace.instance_eval { binding })
+print(result)
+Pathname("/etc/hosts").write(result)
+
+puts
+
+list = `brew services list`
+has_dnsmasq = list.lines.any? {|line|
+	line.start_with?("dnsmasq")
+}
+if has_dnsmasq
+	system("brew services restart dnsmasq")
+end
