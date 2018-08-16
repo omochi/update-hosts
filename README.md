@@ -37,6 +37,4 @@ $ sudo update-hosts
 
 There variables are defined.
 
-```
-ip_address
-```
+- ip_address: your local address.
